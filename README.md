@@ -1,2 +1,3 @@
 # TournamentAnalysis
-General tool to analyse penspinning tournament
+General tool to analyze penspinning tournament
+
