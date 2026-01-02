@@ -18,7 +18,7 @@ for folder in ['data/intermediate', 'data/result']:
 columns_names = data_raw.columns.tolist()
 
 if columns_names.__contains__('Spinner') and columns_names.__contains__('Round'):
-    if data_raw['Spinner'].dtype == 'object' and data_raw['Round'].dtype == 'int64':
+    if data_raw['Spinner'].dtype == 'object' and data_raw['Judge'].dtype == 'object' and data_raw['Round'].dtype == 'int64':
         cols = data_raw.select_dtypes(include=["float64"]).columns
         crit = [c for c in cols if not c.__contains__('Total')]
     else:
