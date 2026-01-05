@@ -46,7 +46,7 @@ a:hover {
   border: 0;
   color: var(--ink);
   padding: 10px 16px;
-  border-radius: 5px;
+  border-radius: var(--radius);
   cursor: pointer;
   font-weight: 600;
   letter-spacing: 0.2px;
@@ -71,8 +71,8 @@ a:hover {
 .dropdown {
   background: #ffffff00;
   /*border: 1px solid var(--line);
-  border-radius: var(--radius);
   border-color: #007eff;*/
+  border-radius: var(--radius);
   padding: 5px 0px;
   min-width: 220px;
   /*box-shadow: 0 4px 12px rgba(31, 26, 19, 0.08);*/

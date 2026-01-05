@@ -33,6 +33,7 @@ COLUMN_WIDTHS = AgGrid_widths(df)
 
 
 crit_violin = px.violin(df, y="Score", x="Criterion", box=True, points="all", title="Score Distribution by Criterion").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+judge_violin = px.violin(df, y="Score", x="Judge", box=True, points="all", title="Score Distribution by Judge").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
 
 # Layout
 app.layout = html.Div([
@@ -121,7 +122,12 @@ app.layout = html.Div([
             className="violin-plot"
         ),
     ], style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "justifyContent": "center", "marginBottom": "20px","marginTop": "10px"}),
-
+    dcc.Graph(
+        figure=judge_violin,
+        id ='judge-violin',
+        style={"width": "100%", "height": "700px"},
+        className="violin-plot"
+    ),
 ], style={"padding": "20px"})
 
 # Filter table with dropdowns
@@ -147,7 +153,8 @@ def update_table(selected_spinners, selected_judges, selected_rounds, selected_c
 
 # Filter violin plot with dropdowns
 @callback(
-    Output('crit-violin', 'figure'), 
+    Output('crit-violin', 'figure'),
+    Output('judge-violin', 'figure'),
     Input('spinner-dropdown', 'value'),
     Input('judge-dropdown', 'value'),
     Input('round-dropdown', 'value'),
@@ -155,6 +162,7 @@ def update_table(selected_spinners, selected_judges, selected_rounds, selected_c
 )
 def update_violin(selected_spinners, selected_judges, selected_rounds, selected_criteria):
     filtered_df = df.copy() 
+    
     if selected_spinners:
         filtered_df = filtered_df[filtered_df['Spinner'].isin(selected_spinners)]
     if selected_judges:
@@ -163,16 +171,11 @@ def update_violin(selected_spinners, selected_judges, selected_rounds, selected_
         filtered_df = filtered_df[filtered_df['Round'].isin(selected_rounds)]
     if selected_criteria:
         filtered_df = filtered_df[filtered_df['Criterion'].isin(selected_criteria)]
-    fig = px.violin(filtered_df, y="Score", x="Criterion", box=True, points="all", title="Score Distribution by Criterion")
-    fig=fig.update_layout(plot_bgcolor="#edf5ff")
-    fig=fig.update_layout(paper_bgcolor="#edf5ff")
-    fig=fig.update_yaxes(
-    showgrid=True,
-    gridcolor="#d9e0e8",
-    gridwidth=1,
-    zeroline=False
-)
-    return fig
+
+    fig_crit = px.violin(filtered_df, y="Score", x="Criterion", box=True, points="all", title="Score Distribution by Criterion").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+    fig_judge = px.violin(filtered_df, y="Score", x="Judge", box=True, points="all", title="Score Distribution by Judge").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+
+    return fig_crit, fig_judge
 
 # Quickly reset or select all filters
 @callback(
