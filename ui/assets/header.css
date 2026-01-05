@@ -3,9 +3,7 @@
   --bg: #edf5ff;
   --ink: #1b0c4b;
   --accent: #2c4280b0;
-  --accent-2: #2f5d62;
   --line: #d8cfc100;
-  --card: #fff8f000;
   --shadow: 0 10px 30px rgba(31, 26, 19, 0.12);
   --radius: 14px;
   --font-title: "Google Sans Flex", "Georgia", serif;
@@ -35,75 +33,12 @@ a:hover {
   text-decoration: underline;
 }
 
-.app-shell {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.header {
-  padding: 24px 32px;
-  background: linear-gradient(120deg, #f9efe1 0%, #f2e3cf 60%, #e8d7c1 100%);
-  border-bottom: 1px solid var(--line);
-}
-
 .header-title {
   font-family: var(--font-title);
   font-size: 28px;
   letter-spacing: 0.5px;
   margin-bottom: 5;
   text-align: center;
-}
-
-.header-subtitle {
-  margin: 6px 0 0;
-  color: #5a4b3b;
-  font-size: 14px;
-}
-
-.page {
-  padding: 28px 32px 40px;
-  flex: 1;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 20px 22px;
-}
-
-.card + .card {
-  margin-top: 18px;
-}
-
-.section-title {
-  font-family: var(--font-title);
-  font-size: 20px;
-  margin: 0 0 12px;
-}
-
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: center;
-}
-
-.button-primary {
-  background: var(--accent);
-  border: 0;
-  color: #fff;
-  padding: 10px 16px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-}
-
-.button-primary:hover {
-  background: #b85e26;
 }
 
 .btn {
@@ -116,7 +51,7 @@ a:hover {
   font-weight: 600;
   letter-spacing: 0.2px;
   transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
-  box-shadow: 0 6px 16px rgba(31, 26, 19, 0.12);
+  /*box-shadow: 0 6px 16px rgba(31, 26, 19, 0.12);*/
   text-align: "center";
   display: "flex";
   justify-content: "center";
@@ -143,13 +78,6 @@ a:hover {
   /*box-shadow: 0 4px 12px rgba(31, 26, 19, 0.08);*/
 }
 
-.title {
-  font-family: var(--font-title);
-  color: var(--ink);
-  letter-spacing: 0.4px;
-  margin: 0 0 10px;
-}
-
 .aggrid {
   background: #edf5ff;
   border: 1px solid var(--line);
@@ -167,11 +95,19 @@ a:hover {
   border-right: 1px solid #d9e0e8;
 }
 
-.heatmap {
-  background: linear-gradient(180deg, #fffaf3 0%, #fff4e3 100%);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px;
+.ag-theme-alpine {
+  --ag-header-background-color: #bed9ff;
+  --ag-header-foreground-color: #1b0c4b;
+}
+
+.ag-theme-alpine .ag-row-odd .ag-cell {
+  background-color: #d6e4f0;
+  color: #1b0c4b;
+}
+
+.ag-theme-alpine .ag-row-even .ag-cell {
+  background-color: #edf5ff;
+  color: #1b0c4b;
 }
 
 .violin-plot {
@@ -181,21 +117,6 @@ a:hover {
   box-shadow: var(--shadow);
   padding: 10px;
   width: fit-content;
-}
-
-.chart {
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px;
-  box-shadow: 0 8px 20px rgba(31, 26, 19, 0.08);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  align-items: stretch;
 }
 
 .filters-row {
@@ -228,24 +149,5 @@ a:hover {
   .filters-actions {
     flex-direction: row;
     justify-content: center;
-  }
-}
-.pill {
-  background: var(--accent-2);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  letter-spacing: 0.2px;
-}
-
-@media (max-width: 720px) {
-  .header,
-  .page {
-    padding: 20px;
-  }
-
-  .header-title {
-    font-size: 24px;
   }
 }

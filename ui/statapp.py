@@ -32,15 +32,7 @@ ALL_ROUNDS = sorted(df['Round'].unique().tolist())
 COLUMN_WIDTHS = AgGrid_widths(df)
 
 
-crit_violin = px.violin(df, y="Score", x="Criterion", box=True, points="all", title="Score Distribution by Criterion")
-crit_violin.update_layout(plot_bgcolor="#edf5ff")
-crit_violin.update_layout(paper_bgcolor="#edf5ff")
-crit_violin.update_yaxes(
-    showgrid=True,
-    gridcolor="#d9e0e8",
-    gridwidth=1,
-    zeroline=False
-)
+crit_violin = px.violin(df, y="Score", x="Criterion", box=True, points="all", title="Score Distribution by Criterion").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
 
 # Layout
 app.layout = html.Div([
@@ -118,8 +110,9 @@ app.layout = html.Div([
             style={
                 "height": "700px",
                 "width": f'{COLUMN_WIDTHS.get("_total", 0)}px',
+                "resize": False,
             },
-            className="aggrid"
+            className="ag-theme-alpine aggrid"
         ),
         dcc.Graph(
             figure=crit_violin,
