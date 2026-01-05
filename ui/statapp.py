@@ -16,7 +16,7 @@ def column_width(col_name):
 
 def AgGrid_widths(df):
     widths = {}
-    total = 17
+    total = 39
     for col in df.columns:
         widths[col] = column_width(col)
         total += widths[col]
@@ -37,98 +37,102 @@ judge_violin = px.violin(df, y="Score", x="Judge", box=True, points="all", title
 
 # Layout
 app.layout = html.Div([
-    html.H1("Penspinning Tournament Analysis", className="header-title"),
-    html.Div(
-        [
-            html.Div(
-                [
-                    html.Button(
-                        "Reset Filters",
-                        id='reset-filters',
-                        n_clicks=0,
-                        className="btn"
-                    ),
-                    html.Button(
-                        "Select All",
-                        id='select-all',
-                        n_clicks=0,
-                        className="btn"
-                    ),
-                ],
-                className="filters-actions"
-            ),
-            html.Div(
-                [
-                    html.Div(
-                        dcc.Dropdown(
-                            id='spinner-dropdown',
-                            options=ALL_SPINNERS,
-                            multi=True,
-                            placeholder="Select Spinners"
+    html.Div([
+       html.H1("Penspinning Tournament Analysis", className="header-title"),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.Button(
+                            "Reset Filters",
+                            id='reset-filters',
+                            n_clicks=0,
+                            className="btn"
                         ),
-                        className="dropdown"
-                    ),
-                    html.Div(
-                        dcc.Dropdown(
-                            id='judge-dropdown',
-                            options=ALL_JUDGES,
-                            multi=True,
-                            placeholder="Select Judges"
+                        html.Button(
+                            "Select All",
+                            id='select-all',
+                            n_clicks=0,
+                            className="btn"
                         ),
-                        className="dropdown"
-                    ),
-                    html.Div(
-                        dcc.Dropdown(
-                            id='round-dropdown',
-                            options=ALL_ROUNDS,
-                            multi=True,
-                            placeholder="Select Rounds"
+                    ],
+                    className="filters-actions"
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            dcc.Dropdown(
+                                id='spinner-dropdown',
+                                options=ALL_SPINNERS,
+                                multi=True,
+                                placeholder="Select Spinners"
+                            ),
+                            className="dropdown"
                         ),
-                        className="dropdown"
-                    ),
-                    html.Div(
-                        dcc.Dropdown(
-                            id='criteria-dropdown',
-                            options=ALL_CRITERIA,
-                            value=['Construction', 'Creativity', 'Deduction', 'Difficulty', 'Execution'],
-                            multi=True,
-                            placeholder="Select Criteria"
+                        html.Div(
+                            dcc.Dropdown(
+                                id='judge-dropdown',
+                                options=ALL_JUDGES,
+                                multi=True,
+                                placeholder="Select Judges"
+                            ),
+                            className="dropdown"
                         ),
-                        className="dropdown"
-                    ),
-                ],
-                className="filters-grid"
-            ),
-        ],
-        className="filters-row"
-    ),
+                        html.Div(
+                            dcc.Dropdown(
+                                id='round-dropdown',
+                                options=ALL_ROUNDS,
+                                multi=True,
+                                placeholder="Select Rounds"
+                            ),
+                            className="dropdown"
+                        ),
+                        html.Div(
+                            dcc.Dropdown(
+                                id='criteria-dropdown',
+                                options=ALL_CRITERIA,
+                                value=['Construction', 'Creativity', 'Deduction', 'Difficulty', 'Execution'],
+                                multi=True,
+                                placeholder="Select Criteria"
+                            ),
+                            className="dropdown"
+                        ),
+                    ],
+                    className="filters-grid"
+                ),
+            ],
+            className="filters-row"
+        ),
+    ], className="header-section"),
     
     html.Div([
-        dag.AgGrid(
-            id='data-table',
-            rowData=df.to_dict('records'),
-            columnDefs=[{"field": c, "width": COLUMN_WIDTHS.get(c)} for c in df.columns],
-            style={
-                "height": "700px",
-                "width": f'{COLUMN_WIDTHS.get("_total", 0)}px',
-                "resize": False,
-            },
-            className="ag-theme-alpine aggrid"
-        ),
+        html.Div([
+            dag.AgGrid(
+                id='data-table',
+                rowData=df.to_dict('records'),
+                columnDefs=[{"field": c, "width": COLUMN_WIDTHS.get(c)} for c in df.columns],
+                style={
+                    "height": "700px",
+                    "width": f'{COLUMN_WIDTHS.get("_total", 0)}px',
+                    "resize": False,
+                },
+                className="ag-theme-alpine aggrid"
+            ),
+            dcc.Graph(
+                figure=crit_violin,
+                id ='crit-violin',
+                style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+                className="violin-plot"
+            ),
+        ], style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "justifyContent": "center", "marginBottom": "20px","marginTop": "10px"}),
         dcc.Graph(
-            figure=crit_violin,
-            id ='crit-violin',
-            style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+            figure=judge_violin,
+            id ='judge-violin',
+            style={"width": "100%", "height": "700px"},
             className="violin-plot"
         ),
-    ], style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "justifyContent": "center", "marginBottom": "20px","marginTop": "10px"}),
-    dcc.Graph(
-        figure=judge_violin,
-        id ='judge-violin',
-        style={"width": "100%", "height": "700px"},
-        className="violin-plot"
-    ),
-], style={"padding": "20px"})
+    ], className="body-section"),
+])
 
 # Filter table with dropdowns
 @callback(

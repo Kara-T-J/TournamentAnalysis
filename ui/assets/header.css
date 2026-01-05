@@ -4,7 +4,7 @@
   --ink: #1b0c4b;
   --accent: #2c4280b0;
   --line: #d8cfc100;
-  --shadow: 0 10px 30px rgba(31, 26, 19, 0.12);
+  --shadow: 0px 2px 20px rgba(19, 25, 31, 0.12);
   --radius: 14px;
   --font-title: "Google Sans Flex", "Georgia", serif;
   --font-body: "Calibri", "Helvetica Neue", Arial, sans-serif;
@@ -33,11 +33,34 @@ a:hover {
   text-decoration: underline;
 }
 
+.header-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--bg);
+  width: 100%;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-top:-20px;
+  margin-bottom: 20px;
+  
+}
+
+.body-section {
+  width: 100%;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding-top: 200px;
+}
+
 .header-title {
   font-family: var(--font-title);
   font-size: 28px;
   letter-spacing: 0.5px;
-  margin-bottom: 5;
+  margin-top: 30px;
+  margin-bottom: 5px;
   text-align: center;
 }
 
@@ -82,7 +105,7 @@ a:hover {
   background: #edf5ff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  /*box-shadow: var(--shadow);*/
   padding: 10px;
   width: fit-content;
 }
@@ -114,7 +137,7 @@ a:hover {
   background: #edf5ff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  /*box-shadow: var(--shadow);*/
   padding: 10px;
   width: fit-content;
 }
@@ -141,9 +164,11 @@ a:hover {
   gap: 10px;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 60px) {
   .filters-row {
     grid-template-columns: 1fr;
+    margin-left: 20px;
+    margin-right: 20px;
   }
 
   .filters-actions {
