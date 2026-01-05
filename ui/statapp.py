@@ -103,6 +103,41 @@ app.layout = html.Div([
             ],
             className="filters-row"
         ),
+        html.Div(
+            [
+                html.Button(
+                    "OVERVIEW",
+                    id='overview-btn',
+                    n_clicks=0,
+                    className="tab-btn"
+                ),
+                html.Button(
+                    "JUDGES",
+                    id='judges-btn',
+                    n_clicks=0,
+                    className="tab-btn"
+                ),
+                html.Button(
+                    "CRITERIA",
+                    id='criteria-btn',
+                    n_clicks=0,
+                    className="tab-btn"
+                ),
+                html.Button(
+                    "ROUNDS",
+                    id='rounds-btn',
+                    n_clicks=0,
+                    className="tab-btn"
+                ),
+                html.Button(
+                    "SPINNERS",
+                    id='spinners-btn',
+                    n_clicks=0,
+                    className="tab-btn"
+                ),
+            ],
+            className="nav-row"
+        ),
     ], className="header-section"),
     
     html.Div([
