@@ -37,6 +37,7 @@ judge_violin = px.violin(df, y="Score", x="Judge", box=True, points="all", title
 
 # Layout
 app.layout = html.Div([
+  # Header Section
     html.Div([
        html.H1("Penspinning Tournament Analysis", className="header-title"),
         html.Div(
@@ -139,7 +140,8 @@ app.layout = html.Div([
             className="nav-row"
         ),
     ], className="header-section"),
-    
+
+    # Overview tab
     html.Div([
         html.Div([
             dag.AgGrid(
