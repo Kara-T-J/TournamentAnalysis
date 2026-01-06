@@ -112,6 +112,11 @@ a:hover {
   box-shadow: 0 4px 10px rgba(31, 26, 19, 0.14);
 }
 
+.tab-btn-active {
+  background: #007eff;
+  color: #ffffff;
+}
+
 .dropdown {
   background: #ffffff00;
   padding: 5px 0px;

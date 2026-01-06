@@ -3,6 +3,7 @@ import dash
 import dash_ag_grid as dag
 import pandas as pd
 import plotly.express as px
+import numpy as np
 
 df_long = pd.read_excel('data/intermediate/WT25_notes_long.xlsx')
 df      = pd.read_excel('data/intermediate/WT25_notes_cleaned.xlsx')
@@ -39,6 +40,59 @@ judge_violin        = px.violin(df_long, y="Score", x="Judge", box=True, points=
 judge_violin_total  = px.violin(df, y="Total", x="Judge", box=True, points="all", title="Score Distribution by Judge").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
 heatmap_crit_judge_mean = px.imshow(df_long.pivot_table(index="Judge", columns="Criterion", values="Score", aggfunc="mean"), text_auto=".2f", aspect="auto", title = "Average Score per Judge/Criterion",color_continuous_scale="Blues").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
 heatmap_crit_judge_std  = px.imshow(df_long.pivot_table(index="Judge", columns="Criterion", values="Score", aggfunc="std"), text_auto=".2f", aspect="auto", title ="Standard Deviation per Judge/Criterion",color_continuous_scale="Blues").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
+
+def criteria_corr_heatmap(source_df):
+    wide = source_df.pivot_table(
+        index=["Spinner", "Round", "Judge"],
+        columns="Criterion",
+        values="Score",
+        aggfunc="mean",
+    )
+    corr_matrix = wide.corr()
+    if corr_matrix.empty:
+        corr_matrix = pd.DataFrame([[np.nan]], index=["No data"], columns=["No data"])
+    else:
+        np.fill_diagonal(corr_matrix.values, np.nan)
+    return px.imshow(
+        corr_matrix,
+        text_auto=".2f",
+        aspect="auto",
+        title="Correlation between Criteria",
+        color_continuous_scale="Blues",
+    ).update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
+
+def criterion_vs_total_excl_heatmap(source_df):
+    wide = source_df.pivot_table(
+        index=["Spinner", "Round", "Judge"],
+        columns="Criterion",
+        values="Score",
+        aggfunc="mean",
+    )
+    if wide.empty:
+        corr_df = pd.DataFrame([[np.nan]], index=["No data"], columns=["No data"])
+    else:
+        total_all = wide.sum(axis=1)
+        rows = []
+        judges = []
+        for judge, group in wide.groupby(level="Judge"):
+            group_total = total_all.loc[group.index]
+            judge_corrs = []
+            for col in group.columns:
+                total_without = group_total - group[col]
+                judge_corrs.append(total_without.corr(group[col]))
+            rows.append(judge_corrs)
+            judges.append(judge)
+        corr_df = pd.DataFrame(rows, index=judges, columns=wide.columns)
+    return px.imshow(
+        corr_df,
+        text_auto=".2f",
+        aspect="auto",
+        title="Correlation: Criterion vs Total (excluding that criterion)",
+        color_continuous_scale="Blues",
+    ).update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
+
+heatmap_crit_correlation = criteria_corr_heatmap(df_long)
+crit_total_corr = criterion_vs_total_excl_heatmap(df_long)
 
 # Layout
 app.layout = html.Div([
@@ -145,35 +199,36 @@ app.layout = html.Div([
             className="nav-row"
         ),
     ], className="header-section"),
+    dcc.Store(id="active-tab", data="overview"),
 
     # Overview tab
-    # html.Div([
-    #     html.Div([
-    #         dag.AgGrid(
-    #             id='data-table',
-    #             rowData=df_long.to_dict('records'),
-    #             columnDefs=[{"field": c, "width": COLUMN_WIDTHS.get(c)} for c in df_long.columns],
-    #             style={
-    #                 "height": "700px",
-    #                 "width": f'{COLUMN_WIDTHS.get("_total", 0)}px',
-    #                 "resize": False,
-    #             },
-    #             className="ag-theme-alpine aggrid"
-    #         ),
-    #         dcc.Graph(
-    #             figure=crit_violin,
-    #             id ='crit-violin',
-    #             style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
-    #             className="violin-plot"
-    #         ),
-    #     ], style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "justifyContent": "center", "marginBottom": "20px","marginTop": "10px"}),
-    #     dcc.Graph(
-    #         figure=judge_violin,
-    #         id ='judge-violin',
-    #         style={"width": "100%", "height": "700px"},
-    #         className="violin-plot"
-    #     ),
-    # ], className="body-section"),
+    html.Div([
+         html.Div([
+             dag.AgGrid(
+                 id='data-table',
+                 rowData=df_long.to_dict('records'),
+                 columnDefs=[{"field": c, "width": COLUMN_WIDTHS.get(c)} for c in df_long.columns],
+                 style={
+                     "height": "700px",
+                     "width": f'{COLUMN_WIDTHS.get("_total", 0)}px',
+                     "resize": False,
+                 },
+                 className="ag-theme-alpine aggrid"
+             ),
+             dcc.Graph(
+                 figure=crit_violin,
+                 id ='crit-violin',
+                 style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+                 className="violin-plot"
+             ),
+         ], style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "justifyContent": "center", "marginBottom": "20px","marginTop": "10px"}),
+         dcc.Graph(
+             figure=judge_violin,
+             id ='judge-violin',
+             style={"width": "100%", "height": "700px"},
+             className="violin-plot"
+         ),
+     ], id="overview-section", className="body-section"),
 
     # Judges tab
     html.Div([
@@ -208,7 +263,30 @@ app.layout = html.Div([
             style={"width": "100%", "height": "700px"},
             className="violin-plot"
         ),
-    ], className="body-section"),
+    ], id="judges-section", className="body-section"),
+
+    # Criteria tab
+    html.Div([
+        dcc.Graph(
+            figure=crit_violin,
+            id ='criteria-violin',
+            style={"width": "100%", "height": "700px"},
+            className="violin-plot"
+        ),
+        dcc.Graph(
+            figure=heatmap_crit_correlation,
+            id ='heatmap-criteria-correlation',
+            style={"height": "700px"},
+            className="heatmap-plot"
+        ),
+        dcc.Graph(
+            figure=crit_total_corr,
+            id="criteria-total-corr",
+            style={"height": "700px"},
+            className="heatmap-plot"
+        ),
+
+    ], id="criteria-section", className="body-section"),
 ])
 
 ## Header section callbacks
@@ -234,6 +312,59 @@ def control_filters(_n_clicks, _m_clicks):
         return ALL_SPINNERS, ALL_JUDGES, ALL_ROUNDS, ALL_CRITERIA
 
 
+## Tab navigation callbacks
+@callback(
+    Output("active-tab", "data"),
+    Input("overview-btn", "n_clicks"),
+    Input("judges-btn", "n_clicks"),
+    Input("criteria-btn", "n_clicks"),
+    Input("rounds-btn", "n_clicks"),
+    Input("spinners-btn", "n_clicks"),
+)
+def set_active_tab(_overview, _judges, _criteria, _rounds, _spinners):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return dash.no_update
+    return ctx.triggered[0]["prop_id"].split(".")[0]
+
+@callback(
+    Output("overview-section", "style"),
+    Output("judges-section", "style"),
+    Output("criteria-section", "style"),
+    Output("overview-btn", "className"),
+    Output("judges-btn", "className"),
+    Output("criteria-btn", "className"),
+    Output("rounds-btn", "className"),
+    Output("spinners-btn", "className"),
+    Input("active-tab", "data"),
+)
+def render_tabs(active_tab):
+    overview_style = {"display": "none"}
+    judges_style = {"display": "none"}
+    criteria_style = {"display": "none"}
+
+    if active_tab == "overview-btn":
+        overview_style = {"display": "block"}
+    elif active_tab == "judges-btn":
+        judges_style = {"display": "block"}
+    elif active_tab == "criteria-btn":
+        criteria_style = {"display": "block"}
+
+    def tab_class(tab_id):
+        return "tab-btn tab-btn-active" if active_tab == tab_id else "tab-btn"
+
+    return (
+        overview_style,
+        judges_style,
+        criteria_style,
+        tab_class("overview-btn"),
+        tab_class("judges-btn"),
+        tab_class("criteria-btn"),
+        tab_class("rounds-btn"),
+        tab_class("spinners-btn"),
+    )
+
+
 ## Overview tab callbacks
 @callback(
     Output('data-table', 'rowData'),
@@ -242,7 +373,7 @@ def control_filters(_n_clicks, _m_clicks):
     Input('round-dropdown', 'value'),
     Input('criteria-dropdown', 'value')
 )
-def update_table(selected_spinners, selected_judges, selected_rounds, selected_criteria):
+def update_table_overview(selected_spinners, selected_judges, selected_rounds, selected_criteria):
     filtered_df = df_long.copy()
 
     if selected_spinners:
@@ -263,7 +394,7 @@ def update_table(selected_spinners, selected_judges, selected_rounds, selected_c
     Input('round-dropdown', 'value'),
     Input('criteria-dropdown', 'value')
 )
-def update_violin(selected_spinners, selected_judges, selected_rounds, selected_criteria):
+def update_violin_overview(selected_spinners, selected_judges, selected_rounds, selected_criteria):
     filtered_df = df_long.copy() 
     
     if selected_spinners:
@@ -289,7 +420,7 @@ def update_violin(selected_spinners, selected_judges, selected_rounds, selected_
     Input('round-dropdown', 'value'),
     Input('criteria-dropdown', 'value')
 )
-def update_judge_violin_notes(selected_spinners, selected_judges, selected_rounds, selected_criteria):
+def update_violin_notes_judge(selected_spinners, selected_judges, selected_rounds, selected_criteria):
     filtered_df = df_long.copy() 
     
     if selected_spinners:
@@ -311,7 +442,7 @@ def update_judge_violin_notes(selected_spinners, selected_judges, selected_round
     Input('judge-dropdown', 'value'),
     Input('round-dropdown', 'value'),
 )
-def update_judge_violin_total(selected_spinners, selected_judges, selected_rounds):
+def update_violin_total_judge(selected_spinners, selected_judges, selected_rounds):
     filtered_df = df.copy() 
     
     if selected_spinners:
@@ -333,7 +464,7 @@ def update_judge_violin_total(selected_spinners, selected_judges, selected_round
     Input('spinner-dropdown', 'value'),
     Input('round-dropdown', 'value'),
 )
-def update_heatmaps_judge_criteria(selected_judge, selected_criteria, selected_spinners, selected_rounds):
+def update_heatmaps_criteria_judge(selected_judge, selected_criteria, selected_spinners, selected_rounds):
     filtered_df = df_long.copy() 
     
     if selected_judge:
@@ -348,21 +479,34 @@ def update_heatmaps_judge_criteria(selected_judge, selected_criteria, selected_s
     heatmap_mean    = px.imshow(filtered_df.pivot_table(index="Judge", columns="Criterion", values="Score", aggfunc="mean"), text_auto=".2f", aspect="auto", title ="Average Score per Judge/Criterion",color_continuous_scale="Blues").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
     heatmap_std     = px.imshow(filtered_df.pivot_table(index="Judge", columns="Criterion", values="Score", aggfunc="std"), text_auto=".2f", aspect="auto", title ="Standard Deviation per Judge/Criterion",color_continuous_scale="Blues").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
     return heatmap_mean, heatmap_std
+
+## Criteria tab callbacks
+@callback(
+    Output('criteria-violin', 'figure'),
+    Output('heatmap-criteria-correlation', 'figure'),
+    Output('criteria-total-corr', 'figure'),
+    Input('spinner-dropdown', 'value'),
+    Input('judge-dropdown', 'value'),
+    Input('round-dropdown', 'value'),
+    Input('criteria-dropdown', 'value')
+)
+def update_violin(selected_spinners, selected_judges, selected_rounds, selected_criteria):
     filtered_df = df_long.copy() 
     
     if selected_spinners:
         filtered_df = filtered_df[filtered_df['Spinner'].isin(selected_spinners)]
+    if selected_judges:
+        filtered_df = filtered_df[filtered_df['Judge'].isin(selected_judges)]
     if selected_rounds:
         filtered_df = filtered_df[filtered_df['Round'].isin(selected_rounds)]
+    if selected_criteria:
+        filtered_df = filtered_df[filtered_df['Criterion'].isin(selected_criteria)]
 
-    heatmap_std = px.imshow(
-        filtered_df.pivot_table(index="Judge", columns="Criterion", values="Score", aggfunc="std"),
-        text_auto=True,
-        aspect="auto",
-        color_continuous_scale="Blues"
-    )
-    return heatmap_std
+    fig_crit = px.violin(filtered_df, y="Score", x="Criterion", box=True, points="all", title="Score Distribution by Criterion").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+    fig_corr = criteria_corr_heatmap(filtered_df)
+    fig_total_corr = criterion_vs_total_excl_heatmap(filtered_df)
 
+    return fig_crit, fig_corr, fig_total_corr
 
 if __name__ == '__main__':
     app.run(debug=True)
