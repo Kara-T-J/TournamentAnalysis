@@ -267,25 +267,28 @@ app.layout = html.Div([
 
     # Criteria tab
     html.Div([
-        dcc.Graph(
-            figure=crit_violin,
-            id ='criteria-violin',
-            style={"width": "100%", "height": "700px"},
-            className="violin-plot"
-        ),
-        dcc.Graph(
-            figure=heatmap_crit_correlation,
-            id ='heatmap-criteria-correlation',
-            style={"height": "700px"},
-            className="heatmap-plot"
-        ),
-        dcc.Graph(
-            figure=crit_total_corr,
-            id="criteria-total-corr",
-            style={"height": "700px"},
-            className="heatmap-plot"
-        ),
-
+        html.Div([
+            dcc.Graph(
+                figure=crit_violin,
+                id ='criteria-violin',
+                style={"height": "1000px"},
+                className="violin-plot"
+            ),
+            html.Div([
+                dcc.Graph(
+                    figure=heatmap_crit_correlation,
+                    id ='heatmap-criteria-correlation',
+                    style={"height": "500px"},
+                    className="heatmap-plot"
+                ),
+                dcc.Graph(
+                    figure=crit_total_corr,
+                    id="criteria-total-corr",
+                    style={"height": "500px"},
+                    className="heatmap-plot"
+                ),
+            ],className= "filters-actions"),
+        ],style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "justifyContent": "center", "marginBottom": "20px","marginTop": "10px"})
     ], id="criteria-section", className="body-section"),
 ])
 
