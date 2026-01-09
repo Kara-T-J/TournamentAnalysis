@@ -37,7 +37,8 @@ COLUMN_WIDTHS       = AgGrid_widths(df_long)
 crit_violin         = px.violin(df_long, y="Score", x="Criterion", box=True, points="all", title="Score Distribution by Criterion").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
 judge_violin        = px.violin(df_long, y="Score", x="Judge", box=True, points="all", title="Score Distribution by Judge").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
 
-judge_violin_total  = px.violin(df, y="Total", x="Judge", box=True, points="all", title="Score Distribution by Judge").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+
+judge_violin_total      = px.violin(df, y="Total", x="Judge", box=True, points="all", title="Score Distribution by Judge").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
 heatmap_crit_judge_mean = px.imshow(df_long.pivot_table(index="Judge", columns="Criterion", values="Score", aggfunc="mean"), text_auto=".2f", aspect="auto", title = "Average Score per Judge/Criterion",color_continuous_scale="Blues").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
 heatmap_crit_judge_std  = px.imshow(df_long.pivot_table(index="Judge", columns="Criterion", values="Score", aggfunc="std"), text_auto=".2f", aspect="auto", title ="Standard Deviation per Judge/Criterion",color_continuous_scale="Blues").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
 
@@ -93,6 +94,17 @@ def criterion_vs_total_excl_heatmap(source_df):
 
 heatmap_crit_correlation = criteria_corr_heatmap(df_long)
 crit_total_corr = criterion_vs_total_excl_heatmap(df_long)
+
+
+df_round_crit = df_long.groupby(['Round', 'Criterion'], as_index=False)['Score'].mean()
+
+round_line_crit = px.line(df_round_crit, x="Round", y="Score", color="Criterion", title="Score per Criterion by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+round_violin_total  = px.violin(df, y="Total", x="Round", box=True, points="all", title="Total Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+round_violin_constr = px.violin(df, y="Construction", x="Round", box=True, points="all", title="Construction Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+round_violin_creat  = px.violin(df, y="Creativity", x="Round", box=True, points="all", title="Creativity Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+round_violin_diff   = px.violin(df, y="Difficulty", x="Round", box=True, points="all", title="Difficulty Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+round_violin_exe    = px.violin(df, y="Execution", x="Round", box=True, points="all", title="Execution Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+
 
 # Layout
 app.layout = html.Div([
@@ -290,6 +302,66 @@ app.layout = html.Div([
             ],className= "filters-actions"),
         ],style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "justifyContent": "center", "marginBottom": "20px","marginTop": "10px"})
     ], id="criteria-section", className="body-section"),
+
+    # Rounds tab
+    html.Div([
+        html.Div(
+        [
+            dcc.Graph(
+                figure=round_violin_total,
+                id ='round_violin_total',
+                style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+                className="violin-plot"
+            ),
+            dcc.Graph(
+                figure=round_line_crit,
+                id ='round_line_crit',
+                style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+                className="violin-plot"
+            ),
+        ],
+        className="heatmap-row"
+        ),
+        html.Div(
+        [
+            dcc.Graph(
+                figure=round_violin_constr,
+                id ='round_violin_constr',
+                style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+                className="violin-plot"
+            ),
+            dcc.Graph(
+                figure=round_violin_creat,
+                id ='round_violin_creat',
+                style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+                className="violin-plot"
+            ),
+        ],
+        className="heatmap-row"
+        ),
+        html.Div(
+        [
+            dcc.Graph(
+                figure=round_violin_diff,
+                id ='round_violin_diff',
+                style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+                className="violin-plot"
+            ),
+            dcc.Graph(
+                figure=round_violin_exe,
+                id ='round_violin_exe',
+                style={"flex": "1 1 400px", "minWidth": "300px", "height": "700px"},
+                className="violin-plot"
+            ),
+        ],
+        className="heatmap-row"
+        ),
+    ], id="rounds-section", className="body-section"),
+
+    # Spinners tab
+    html.Div([
+        html.H2("Spinners Analysis Coming Soon!", style={"textAlign": "center", "marginTop": "50px"})
+    ], id="spinners-section", className="body-section"),
 ])
 
 ## Header section callbacks
@@ -334,6 +406,8 @@ def set_active_tab(_overview, _judges, _criteria, _rounds, _spinners):
     Output("overview-section", "style"),
     Output("judges-section", "style"),
     Output("criteria-section", "style"),
+    Output("rounds-section", "style"),
+    Output("spinners-section", "style"),
     Output("overview-btn", "className"),
     Output("judges-btn", "className"),
     Output("criteria-btn", "className"),
@@ -345,6 +419,8 @@ def render_tabs(active_tab):
     overview_style = {"display": "none"}
     judges_style = {"display": "none"}
     criteria_style = {"display": "none"}
+    round_style = {"display": "none"}
+    spinners_style = {"display": "none"}
 
     if active_tab == "overview-btn":
         overview_style = {"display": "block"}
@@ -352,6 +428,10 @@ def render_tabs(active_tab):
         judges_style = {"display": "block"}
     elif active_tab == "criteria-btn":
         criteria_style = {"display": "block"}
+    elif active_tab == "rounds-btn":
+        round_style = {"display":"block"}
+    elif active_tab == "spinners-btn":
+        spinners_style = {"display":"block"}
 
     def tab_class(tab_id):
         return "tab-btn tab-btn-active" if active_tab == tab_id else "tab-btn"
@@ -360,6 +440,8 @@ def render_tabs(active_tab):
         overview_style,
         judges_style,
         criteria_style,
+        round_style,
+        spinners_style,
         tab_class("overview-btn"),
         tab_class("judges-btn"),
         tab_class("criteria-btn"),
@@ -483,6 +565,7 @@ def update_heatmaps_criteria_judge(selected_judge, selected_criteria, selected_s
     heatmap_std     = px.imshow(filtered_df.pivot_table(index="Judge", columns="Criterion", values="Score", aggfunc="std"), text_auto=".2f", aspect="auto", title ="Standard Deviation per Judge/Criterion",color_continuous_scale="Blues").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff", xaxis_title=None, yaxis_title=None)
     return heatmap_mean, heatmap_std
 
+
 ## Criteria tab callbacks
 @callback(
     Output('criteria-violin', 'figure'),
@@ -493,7 +576,7 @@ def update_heatmaps_criteria_judge(selected_judge, selected_criteria, selected_s
     Input('round-dropdown', 'value'),
     Input('criteria-dropdown', 'value')
 )
-def update_violin(selected_spinners, selected_judges, selected_rounds, selected_criteria):
+def update_criteria_plot(selected_spinners, selected_judges, selected_rounds, selected_criteria):
     filtered_df = df_long.copy() 
     
     if selected_spinners:
@@ -510,6 +593,62 @@ def update_violin(selected_spinners, selected_judges, selected_rounds, selected_
     fig_total_corr = criterion_vs_total_excl_heatmap(filtered_df)
 
     return fig_crit, fig_corr, fig_total_corr
+
+
+## Rounds tab callback
+@callback(
+    Output('round_line_crit', 'figure'),
+    Input('spinner-dropdown', 'value'),
+    Input('judge-dropdown', 'value'),
+    Input('round-dropdown', 'value'),
+    Input('criteria-dropdown', 'value')
+)
+def update_rounds_line(selected_spinners, selected_judges, selected_rounds, selected_criteria):
+    filtered_df = df_long.copy() 
+    
+    if selected_spinners:
+        filtered_df = filtered_df[filtered_df['Spinner'].isin(selected_spinners)]
+    if selected_judges:
+        filtered_df = filtered_df[filtered_df['Judge'].isin(selected_judges)]
+    if selected_rounds:
+        filtered_df = filtered_df[filtered_df['Round'].isin(selected_rounds)]
+    if selected_criteria:
+        filtered_df = filtered_df[filtered_df['Criterion'].isin(selected_criteria)]
+
+    df_round_crit_filtered = filtered_df.groupby(['Round', 'Criterion'], as_index=False)['Score'].mean()
+
+    fig_line = px.line(df_round_crit_filtered, x="Round", y="Score", color="Criterion", title="Score per Criterion by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+
+    return fig_line
+
+@callback(
+    Output('round_violin_total', 'figure'),
+    Output('round_violin_constr', 'figure'),
+    Output('round_violin_creat', 'figure'),
+    Output('round_violin_diff', 'figure'),
+    Output('round_violin_exe', 'figure'),
+    Input('spinner-dropdown', 'value'),
+    Input('judge-dropdown', 'value'),
+    Input('round-dropdown', 'value'),
+)
+def update_rounds_violins(selected_spinners, selected_judges, selected_rounds):
+    filtered_df = df.copy() 
+    
+    if selected_spinners:
+        filtered_df = filtered_df[filtered_df['Spinner'].isin(selected_spinners)]
+    if selected_judges:
+        filtered_df = filtered_df[filtered_df['Judge'].isin(selected_judges)]
+    if selected_rounds:
+        filtered_df = filtered_df[filtered_df['Round'].isin(selected_rounds)]
+
+    fig_total = px.violin(filtered_df, y="Total", x="Round", box=True, points="all", title="Total Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+    fig_constr = px.violin(filtered_df, y="Construction", x="Round", box=True, points="all", title="Construction Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+    fig_creat = px.violin(filtered_df, y="Creativity", x="Round", box=True, points="all", title="Creativity Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+    fig_diff = px.violin(filtered_df, y="Difficulty", x="Round", box=True, points="all", title="Difficulty Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+    fig_exe = px.violin(filtered_df, y="Execution", x="Round", box=True, points="all", title="Execution Score by Round").update_layout(plot_bgcolor="#edf5ff", paper_bgcolor="#edf5ff").update_yaxes(showgrid=True, gridcolor="#d9e0e8", gridwidth=1, zeroline=False)
+
+    return fig_total, fig_constr, fig_creat, fig_diff, fig_exe
+
 
 if __name__ == '__main__':
     app.run(debug=True)
